@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <cmath>
 
-#include <botan/botan.h>
+#include <botan/auto_rng.h>
 #include <botan/lookup.h>
 #include <botan/cipher_mode.h>
 

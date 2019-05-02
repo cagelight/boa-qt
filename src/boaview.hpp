@@ -17,6 +17,7 @@ public slots:
 	void remRow();
 	void load(QString, QString, QString);
 	void save(QString, QString, QString);
+	QList<QTableWidgetItem *> find(QString str);
 };
 
 class BoaView : public QWidget {
@@ -44,6 +45,8 @@ private:
 	QCheckBox * keygenCBUppercase = nullptr;
 	QCheckBox * keygenCBLowercase = nullptr;
 	QCheckBox * keygenCBNumeric = nullptr;
+	QLineEdit * findEdit = nullptr;
+	uint_fast64_t findCur = 0;
 signals:
 	void doLoad(QString, QString, QString);
 	void doSave(QString, QString, QString);

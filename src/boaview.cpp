@@ -48,6 +48,7 @@ void BoaTable::load(QString key, QString hash_func, QString cipher_func) {
 	boa::array rows;
 	try {
 		rows = boa::from_data(key.toStdString(), hash_func.toStdString(), cipher_func.toStdString(), data);
+		std::sort(rows.begin(), rows.end(), [](boa::array::value_type const & a, boa::array::value_type const & b){ return boa::entry::compare(a, b); });
 	} catch (std::exception & err) {
 		QMessageBox::critical(this, "ERROR", QString("FAILED TO LOAD:\n%1").arg(err.what()));
 		return;
@@ -107,8 +108,18 @@ void BoaTable::save(QString key, QString hash_func, QString cipher_func) {
 	f.write(qdata);
 }
 
+QList<QTableWidgetItem *> BoaTable::find(QString str) {
+	QList<QTableWidgetItem *> ret {};
+	for (int i = 0; i < rowCount(); i++) {
+		QTableWidgetItem * item2 = item(i, 0);
+		if (item2->text().contains(str)) ret.append(item2);
+	}
+	return ret;
+}
+
 BoaView::BoaView(QWidget * parent) : QWidget(parent) {
 	QGridLayout * topl = new QGridLayout {this};
+	topl->setMargin(0);
 	int current_row = 0;
 	
 	QHBoxLayout * crypt_layout = new QHBoxLayout {};
@@ -129,6 +140,17 @@ BoaView::BoaView(QWidget * parent) : QWidget(parent) {
 	
 	QPushButton * saveB = new QPushButton("Save", this);
 	topl->addWidget(saveB, current_row++, 1, 1, 1);
+	
+	QHBoxLayout * findLayout = new QHBoxLayout {};
+	QLabel * findLabel = new QLabel {"Find: ", this};
+	findEdit = new QLineEdit {this};
+	QPushButton * findNextB = new QPushButton {"Next", this};
+	QPushButton * findPrevB = new QPushButton {"Prev", this};
+	findLayout->addWidget(findLabel);
+	findLayout->addWidget(findEdit);
+	findLayout->addWidget(findNextB);
+	findLayout->addWidget(findPrevB);
+	topl->addLayout(findLayout, current_row++, 0, 1, 2);
 	
 	tb = new BoaTable(this);
 	
@@ -180,14 +202,20 @@ BoaView::BoaView(QWidget * parent) : QWidget(parent) {
 	topl->addWidget(new QLabel("Output:", this), current_row++, 0, 1, 2);
 	topl->addWidget(outputEdit, current_row++, 0, 1, 2);
 	
-	connect(loadB, SIGNAL(pressed()), this, SLOT(intLoad()));
-	connect(saveB, SIGNAL(pressed()), this, SLOT(intSave()));
+	connect(loadB, SIGNAL(clicked()), this, SLOT(intLoad()));
+	connect(saveB, SIGNAL(clicked()), this, SLOT(intSave()));
 	connect(this, SIGNAL(doLoad(QString, QString, QString)), tb, SLOT(load(QString, QString, QString)));
 	connect(this, SIGNAL(doSave(QString, QString, QString)), tb, SLOT(save(QString, QString, QString)));
-	connect(addB, SIGNAL(pressed()), tb, SLOT(addRow()));
-	connect(remB, SIGNAL(pressed()), tb, SLOT(remRow()));
-	connect(hashB, SIGNAL(pressed()), this, SLOT(intHash()));
-	connect(keygenB, SIGNAL(pressed()), this, SLOT(intKeygen()));
+	connect(addB, SIGNAL(clicked()), tb, SLOT(addRow()));
+	connect(remB, SIGNAL(clicked()), tb, SLOT(remRow()));
+	connect(hashB, SIGNAL(clicked()), this, SLOT(intHash()));
+	connect(keygenB, SIGNAL(clicked()), this, SLOT(intKeygen()));
+	
+	connect(findEdit, &QLineEdit::textChanged, this, [this](){
+		findCur = 0;
+		auto items = tb->find(findEdit->text());
+		if (items.size()) tb->setCurrentItem(items[0]);
+	});
 }
 
 BoaView::~BoaView() {

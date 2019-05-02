@@ -11,6 +11,13 @@ namespace boa {
 		std::string username;
 		std::string password;
 		std::string addinfo;
+		
+		static bool compare(entry const & A, entry const & B) {
+			if (A.name != B.name) return  A.name < B.name;
+			if (A.username != B.username) return  A.username < B.username;
+			if (A.email != B.email) return  A.email < B.email;
+			return false;
+		}
 	};
 	
 	typedef std::vector<entry> array;
