@@ -1,10 +1,11 @@
 #include "boastuff.hpp"
 
+#include <iostream>
 #include <unordered_map>
 #include <cmath>
 
 #include <botan/auto_rng.h>
-#include <botan/lookup.h>
+#include <botan/hash.h>
 #include <botan/cipher_mode.h>
 
 using namespace Botan;
@@ -37,8 +38,6 @@ static std::unique_ptr<cryptor> & get_cipher(std::string const & text) {
 	return cipher_map[text] = std::move(c);
 }
 
-
-
 boa::array boa::from_data(std::string const & key, std::string const & hash_func_name, std::string const & cipher_func_name, boa::binary_data const & dat) {
 	array arr;
 	
@@ -56,9 +55,14 @@ boa::array boa::from_data(std::string const & key, std::string const & hash_func
 	
 	secure_vector<uint8_t> decvec {body.begin(), body.end()};
 	
-	cipher->dec->set_key(hash_buf);
-	cipher->dec->start();
-	cipher->dec->finish(decvec);
+	try {
+		cipher->dec->set_key(hash_buf);
+		cipher->dec->start();
+		cipher->dec->finish(decvec);
+	} catch (...) {
+		cipher->dec->clear();
+		rethrow_exception(std::current_exception());
+	}
 	
 	std::vector<uint8_t> raw_data {decvec.begin(), decvec.end()};
 	
