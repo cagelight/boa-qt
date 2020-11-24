@@ -112,7 +112,7 @@ QList<QTableWidgetItem *> BoaTable::find(QString str) {
 	QList<QTableWidgetItem *> ret {};
 	for (int i = 0; i < rowCount(); i++) {
 		QTableWidgetItem * item2 = item(i, 0);
-		if (item2->text().contains(str)) ret.append(item2);
+		if (item2->text().contains(str, Qt::CaseInsensitive)) ret.append(item2);
 	}
 	return ret;
 }
