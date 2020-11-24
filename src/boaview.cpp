@@ -125,7 +125,7 @@ BoaView::BoaView(QWidget * parent) : QWidget(parent) {
 	QHBoxLayout * crypt_layout = new QHBoxLayout {};
 	keyEdit = new QLineEdit("", this);
 	keyEdit->setEchoMode(QLineEdit::Password);
-	hashEdit = new QLineEdit("Skein-512", this);
+	hashEdit = new QLineEdit("SHA-3", this);
 	cipherEdit = new QLineEdit("Threefish-512/EAX", this);
 	crypt_layout->addWidget(new QLabel("Key:", this));
 	crypt_layout->addWidget(keyEdit);
